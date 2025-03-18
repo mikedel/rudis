@@ -20,7 +20,24 @@ Rudis is designed for high performance:
 
 ## Getting Started
 
-### Installation
+### Local Setup
 
+1. Clone the repository:
 ```bash
-cargo install rudis
+git clone https://github.com/mikedel/rudis.git
+```
+
+2. Build the project:
+```bash
+cargo build
+```
+
+3. Run the server:
+```bash
+cargo run --bin rudis
+```
+
+4. Test the server:
+```bash
+cargo run --bin benchmark
+```
