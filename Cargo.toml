@@ -1,0 +1,14 @@
+[package]
+name = "rudis"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.28", features = ["full"] }
+bytes = "1.4"
+thiserror = "1.0"
+chrono = "0.4"
+dashmap = "5.4"  # Thread-safe concurrent map
+clap = { version = "4.2", features = ["derive"] } # For command-line args
+log = "0.4"
+env_logger = "0.10"
