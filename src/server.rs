@@ -117,6 +117,13 @@ async fn execute_command(cmd: RedisCommand, storage: &Storage) -> RedisValue {
                 Err(e) => RedisValue::Error(format!("Delete error: {}", e)),
             }
         },
+        RedisCommand::Keys { pattern } => {
+            let keys = storage.keys(&pattern);
+            let values = keys.into_iter()
+                .map(|k| RedisValue::String(k))
+                .collect();
+            RedisValue::Array(values)
+        },
         RedisCommand::Pop => {
             match storage.pop_fifo() {
                 Ok((key, value)) => RedisValue::Array(vec![

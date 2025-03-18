@@ -130,4 +130,44 @@ impl Client {
         
         Err(ClientError::ProtocolError(format!("Unexpected response: {}", response)))
     }
+    
+    pub async fn keys(&mut self, pattern: &str) -> Result<Vec<String>> {
+        let cmd = format!("KEYS {}\r\n", pattern);
+        self.stream.write_all(cmd.as_bytes()).await?;
+        
+        let mut response_buf = [0u8; 4096]; // Larger buffer for potentially many keys
+        let n = self.stream.read(&mut response_buf).await?;
+        
+        if n == 0 {
+            return Err(ClientError::ConnectionError(std::io::Error::new(
+                std::io::ErrorKind::UnexpectedEof,
+                "Connection closed",
+            )));
+        }
+        
+        let response = std::str::from_utf8(&response_buf[..n])
+            .map_err(|_| ClientError::ProtocolError("Invalid UTF-8".to_string()))?;
+        
+        // Handle empty array
+        if response.starts_with("*0") {
+            return Ok(Vec::new());
+        }
+        
+        // Simple parsing for array response
+        if response.starts_with("*") {
+            let parts: Vec<&str> = response.split("\r\n").collect();
+            let mut keys = Vec::new();
+            
+            // Skip the first line (*<count>) and process each key
+            for i in (1..parts.len()).step_by(2) {
+                if i + 1 < parts.len() && parts[i].starts_with("$") {
+                    keys.push(parts[i+1].to_string());
+                }
+            }
+            
+            return Ok(keys);
+        }
+        
+        Err(ClientError::ProtocolError(format!("Unexpected response: {}", response)))
+    }
 }

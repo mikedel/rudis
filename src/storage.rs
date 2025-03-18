@@ -129,4 +129,37 @@ impl Storage {
         
         removed
     }
+
+    pub fn keys(&self, pattern: &str) -> Vec<String> {
+        let now = Instant::now();
+        let mut keys = Vec::new();
+        
+        // Simple pattern matching (only supports * wildcard at the end)
+        let is_wildcard = pattern.ends_with('*');
+        let prefix = if is_wildcard {
+            pattern[..pattern.len() - 1].to_string()
+        } else {
+            pattern.to_string()
+        };
+        
+        for entry in self.map.iter() {
+            let key = entry.key();
+            
+            // Skip expired keys
+            if let Some(expiry) = entry.value().expiry {
+                if now > expiry {
+                    continue;
+                }
+            }
+            
+            // Match the pattern
+            if pattern == "*" || 
+               (is_wildcard && key.starts_with(&prefix)) || 
+               (!is_wildcard && key == pattern) {
+                keys.push(key.clone());
+            }
+        }
+        
+        keys
+    }
 }

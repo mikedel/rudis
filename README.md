@@ -39,5 +39,5 @@ cargo run --bin rudis
 
 4. Test the server:
 ```bash
-cargo run --bin benchmark
+redis-cli -h 127.0.0.1 -p 6379 KEYS "*"
 ```
